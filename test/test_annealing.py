@@ -1,7 +1,7 @@
 import pytest
 import random
 from src.graph import Graph, is_proper_coloring
-from src.annealing import simulated_annealing, count_conflicts
+from src.annealing import simulated_annealing, count_conflicts, SAResult
 
 
 def test_count_conflicts_basic():
@@ -23,16 +23,20 @@ def test_sa_returns_result_object():
     g.add_edge(1, 2)
 
     result = simulated_annealing(g, k=3, max_iter=2000)
+    assert isinstance(result, SAResult)
     assert hasattr(result, "coloring")
     assert hasattr(result, "num_colors")
     assert hasattr(result, "conflicts")
     assert hasattr(result, "time_seconds")
+    # Test __repr__ method
+    repr_str = repr(result)
+    assert "SAResult" in repr_str
+    assert "num_colors" in repr_str
 
 
 def test_sa_solves_easy_graph():
     """
-    A path graph of 4 nodes is 2-colorable.
-    SA with k=3 should easily find a valid coloring.
+    A path graph of 4 nodes is 2-colorable. SA with k=3 should easily find a valid coloring.
     """
     random.seed(1)
     g = Graph(4)
@@ -50,8 +54,7 @@ def test_sa_solves_easy_graph():
 
 def test_sa_may_fail_when_k_too_small():
     """
-    A triangle graph cannot be 2-colored.
-    SA should fail with conflicts > 0 for k=2.
+    A triangle graph cannot be 2-colored. SA should fail with conflicts > 0 for k=2.
     """
     random.seed(2)
     g = Graph(3)
